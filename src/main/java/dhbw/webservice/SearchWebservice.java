@@ -50,7 +50,7 @@ public class SearchWebservice {
             List<SearchResultList> resultList = new ArrayList<>();
             switch (type) {
                 
-                // Falls Track gesucht wird
+                // Falls nach Track gesucht wird
                 
                 case "TRACK":
                     SearchTrack track = om.readValue(s, SearchTrack.class);
