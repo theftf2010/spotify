@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  *
- * @author Foecking
+ * @author Foecking, mrastetter and Lischka
  */
 @RestController
 public class SearchWebservice {
@@ -36,6 +36,8 @@ public class SearchWebservice {
         category = RequestCategory.valueOf(type);
         String s = "";
         String json = "";
+        
+        // TRY-Block
         try {
             stringOptional = spotifyRequest.performeRequestSearch(category, query, 10, "DE");
             if (stringOptional.isPresent()) {
@@ -47,6 +49,9 @@ public class SearchWebservice {
             List<dhbw.pojo.search.artist.Item> itemArtist = new ArrayList<>();
             List<SearchResultList> resultList = new ArrayList<>();
             switch (type) {
+                
+                // Falls Track gesucht wird
+                
                 case "TRACK":
                     SearchTrack track = om.readValue(s, SearchTrack.class);
                     itemTrack = track.getTracks().getItems();
@@ -59,10 +64,13 @@ public class SearchWebservice {
                         resultList.add(resultItemList);
                     }
                     break;
-                case "ALBUM":
-                    SearchAlbum album = om.readValue(s, SearchAlbum.class);
-                    itemAlbum = album.getAlbums().getItems();
-                    for (dhbw.pojo.search.album.Item element : itemAlbum) {
+                    
+                    // Falls nach Künstler gesucht wird
+                    
+                case "ARTIST":
+                    SearchArtist artist = om.readValue(s, SearchArtist.class);
+                    itemArtist = artist.getArtists().getItems();
+                    for (dhbw.pojo.search.artist.Item element : itemArtist) {
                         String id = element.getId();
                         String title = element.getName();
                         String description = element.getType();
@@ -71,10 +79,12 @@ public class SearchWebservice {
                         resultList.add(resultItemList);
                     }
                     break;
-                case "ARTIST":
-                    SearchArtist artist = om.readValue(s, SearchArtist.class);
-                    itemArtist = artist.getArtists().getItems();
-                    for (dhbw.pojo.search.artist.Item element : itemArtist) {
+                    
+                //Falls nach Album gesucht wird    
+                case "ALBUM":
+                    SearchAlbum album = om.readValue(s, SearchAlbum.class);
+                    itemAlbum = album.getAlbums().getItems();
+                    for (dhbw.pojo.search.album.Item element : itemAlbum) {
                         String id = element.getId();
                         String title = element.getName();
                         String description = element.getType();
