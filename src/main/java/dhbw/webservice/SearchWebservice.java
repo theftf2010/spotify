@@ -48,6 +48,7 @@ public class SearchWebservice {
             List<dhbw.pojo.search.album.Item> itemAlbum = new ArrayList<>();
             List<dhbw.pojo.search.artist.Item> itemArtist = new ArrayList<>();
             List<SearchResultList> resultList = new ArrayList<>();
+            
             switch (type) {
                 
                 // Falls nach Track gesucht wird
@@ -100,10 +101,13 @@ public class SearchWebservice {
             searchResult.setSearchTerm(query);
             searchResult.setSearchCategory(type);
             searchResult.setResults(resultList);
+            
             json = om.writeValueAsString(searchResult);
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
         return json;
     }
 }
