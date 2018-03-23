@@ -14,6 +14,8 @@ import dhbw.pojo.search.track.SearchTrack;
 import dhbw.spotify.RequestCategory;
 import dhbw.spotify.RequestType;
 import dhbw.spotify.SpotifyRequest;
+import dhbw.spotify.WrongRequestTypeException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -104,8 +106,9 @@ public class SearchWebservice {
             
             json = om.writeValueAsString(searchResult);
             
-        } catch (Exception e) {
+        } catch (WrongRequestTypeException | IOException e) {
             e.printStackTrace();
+            
         }
         
         return json;

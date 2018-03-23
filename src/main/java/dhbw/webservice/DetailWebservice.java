@@ -13,6 +13,8 @@ import dhbw.pojo.result.detail.DetailResult;
 import dhbw.spotify.RequestCategory;
 import dhbw.spotify.RequestType;
 import dhbw.spotify.SpotifyRequest;
+import dhbw.spotify.WrongRequestTypeException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,35 +62,14 @@ public class DetailWebservice {
                     durationrestsec = durationsec % 60;
 
                     //Umwandlung in ArrayLists
-                    ArrayList<String> listTrackArtists = new ArrayList<String>();
+                    ArrayList<String> listTrackArtists = new ArrayList<>();
                     for (int i = 0; i < detailsTrack.getArtists().size(); i++) {
                         listTrackArtists.add(detailsTrack.getArtists().get(i).getName());
                     }
 
                     //Initialisieren
                     title = detailsTrack.getName();
-                    info = "type: " + detailsTrack.getType() + "\n" + "artists: " + sb(listTrackArtists).toString() + "\n" + "album: " + detailsTrack.getAlbum().getName() + "\n" + "duration: " + Long.toString(durationmin) + " min " + Long.toString(durationrestsec) + " sec" + "\n" + "popularity: " + detailsTrack.getPopularity().toString();
-                    result = new DetailResult(title, info);
-                    break;
-
-                // Album
-                case "ALBUM":
-                    DetailsAlbum detailsAlbum = om.readValue(s, DetailsAlbum.class);
-
-                    //Umwandlung in ArrayLists
-                    ArrayList<String> listAlbumArtists = new ArrayList<String>();
-                    for (int i = 0; i < detailsAlbum.getArtists().size(); i++) {
-                        listAlbumArtists.add(detailsAlbum.getArtists().get(i).getName());
-                    }
-
-                    ArrayList<String> listAlbumGenres = new ArrayList<String>();
-                    for (int i = 0; i < detailsAlbum.getGenres().size(); i++) {
-                        listAlbumGenres.add(detailsAlbum.getGenres().get(i).toString());
-                    }
-
-                    //Initialisieren
-                    title = detailsAlbum.getName();
-                    info = "type: " + detailsAlbum.getType() + "\n" + "artists: " + sb(listAlbumArtists).toString() + "\n" + "label: " + detailsAlbum.getLabel() + "\n" + "genres: " + sb(listAlbumGenres).toString() + "\n" + "release date: " + detailsAlbum.getReleaseDate() + "\n" + "tracks: " + detailsAlbum.getTracks().getTotal().toString() + "\n" + "popularity: " + detailsAlbum.getPopularity().toString();
+                    info = "type: " + detailsTrack.getType() + "\n" + "artists: " + sb(listTrackArtists).toString() + "\n" + "album: " + detailsTrack.getAlbum().getName() + "\n" + "duration: " + Long.toString(durationmin) + " min " + Long.toString(durationrestsec) + " sec" + "\n" + "popularity: " + detailsTrack.getPopularity().toString() + " %";
                     result = new DetailResult(title, info);
                     break;
 
@@ -97,16 +78,37 @@ public class DetailWebservice {
                     DetailsArtist detailsArtist = om.readValue(s, DetailsArtist.class);
 
                     //Umwandlung in ArrayLists
-                    ArrayList<String> listArtistGenres = new ArrayList<String>();
+                    ArrayList<String> listArtistGenres = new ArrayList<>();
                     for (int i = 0; i < detailsArtist.getGenres().size(); i++) {
                         listArtistGenres.add(detailsArtist.getGenres().get(i));
                     }
 
                     //Initialisieren
                     title = detailsArtist.getName();
-                    info = "type: " + detailsArtist.getType() + "\n" + "genres: " + sb(listArtistGenres).toString() + "\n" + "followers: " + detailsArtist.getFollowers().getTotal().toString() + "\n" + "popularity: " + detailsArtist.getPopularity().toString();
+                    info = "type: " + detailsArtist.getType() + "\n" + "genres: " + sb(listArtistGenres).toString() + "\n" + "followers: " + detailsArtist.getFollowers().getTotal().toString() + "\n" + "popularity: " + detailsArtist.getPopularity().toString() + " %";
                     result = new DetailResult(title, info);
 
+                    break;
+
+                // Album
+                case "ALBUM":
+                    DetailsAlbum detailsAlbum = om.readValue(s, DetailsAlbum.class);
+
+                    //Umwandlung in ArrayLists
+                    ArrayList<String> listAlbumArtists = new ArrayList<>();
+                    for (int i = 0; i < detailsAlbum.getArtists().size(); i++) {
+                        listAlbumArtists.add(detailsAlbum.getArtists().get(i).getName());
+                    }
+
+                    ArrayList<String> listAlbumGenres = new ArrayList<>();
+                    for (int i = 0; i < detailsAlbum.getGenres().size(); i++) {
+                        listAlbumGenres.add(detailsAlbum.getGenres().get(i).toString());
+                    }
+
+                    //Initialisieren
+                    title = detailsAlbum.getName();
+                    info = "type: " + detailsAlbum.getType() + "\n" + "artists: " + sb(listAlbumArtists).toString() + "\n" + "label: " + detailsAlbum.getLabel() + "\n" + "genres: " + sb(listAlbumGenres).toString() + "\n" + "release date: " + detailsAlbum.getReleaseDate() + "\n" + "tracks: " + detailsAlbum.getTracks().getTotal().toString() + "\n" + "popularity: " + detailsAlbum.getPopularity().toString() + " %";
+                    result = new DetailResult(title, info);
                     break;
 
                 default:
@@ -115,7 +117,7 @@ public class DetailWebservice {
             // Initialisierung objectmapper
             json = new ObjectMapper().writeValueAsString(result);
         } // Abfangen Exceptions
-        catch (Exception e) {
+        catch (WrongRequestTypeException | IOException e) {
             e.printStackTrace();
         }
 
@@ -127,15 +129,16 @@ public class DetailWebservice {
     public StringBuilder sb(ArrayList<String> list) {
         StringBuilder sb = new StringBuilder();
 
-        for (String string : list) {
+        list.stream().map((string) -> {
             sb.append(string);
+            return string;
+        }).forEach((string) -> {
             if (string.equals(list.get(list.size() - 1))) {
 
             } else {
                 sb.append(", ");
             }
-
-        }
+        });
         return sb;
     }
 
